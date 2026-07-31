@@ -1,0 +1,10 @@
+{
+  "selected_points": 80,
+  "generators_assigned": 29,
+  "total_vulnerable_need": 317719,
+  "optimized_coverage": 116761,
+  "optimized_coverage_pct": 36.7,
+  "equal_distribution_coverage": 41717,
+  "equal_distribution_coverage_pct": 13.1,
+  "improvement_pp": 23.6
+}

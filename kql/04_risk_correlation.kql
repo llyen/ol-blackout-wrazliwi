@@ -1,0 +1,66 @@
+// Risk correlation and alert queries.
+
+// 1. Critical gminas from IWL + outage + telecom. Visual: ranked correlation table.
+let current_outage = CurrentOutageByGmina() | where is_without_power;
+let current_telco = TelecomCoverage | summarize arg_max(event_time, *) by gmina_code;
+GminaVulnerability
+| join kind=leftouter current_outage on gmina_code
+| join kind=leftouter current_telco on gmina_code
+| extend outage_component=iff(isnull(customers_without_power),0.0,1.0), telecom_component=1.0-coalesce(coverage_pct,0.9)
+| extend izz_score = 100.0*(0.45*iwl_score/100.0 + 0.30*outage_component + 0.15*telecom_component)
+| where izz_score > 75
+| order by izz_score desc
+
+// 2. Cascade detection. Rule: Cascade_Detected.
+OutageEvents
+| summarize affected_gminas=dcount(gmina_code), customers=sum(customers_without_power) by bin(event_time, 2h), cascade_stage
+| order by event_time asc
+| extend customer_jump = customers - prev(customers)
+| where customer_jump > 50000 or affected_gminas > 25
+
+// 3. Severe cold with active power outage. Rule: SevereCold_NoPower.
+let cold = WeatherReadings | summarize arg_max(event_time, *) by powiat_code | where feels_like_c < -20;
+CurrentOutageByGmina()
+| where is_without_power
+| join kind=inner (GminaToPowiat | project gmina_code, powiat_code) on gmina_code
+| join kind=inner cold on powiat_code
+| project gmina_code, powiat_code, feels_like_c, customers_without_power
+
+// 4. Telecom battery exhaustion. Rule: Telecom_Blackout.
+TelecomCoverage
+| where coverage_pct < 0.2
+| summarize first_seen=min(event_time), last_seen=max(event_time), samples=count() by gmina_code
+| extend duration_hours=datetime_diff('hour', last_seen, first_seen)
+| where duration_hours >= 2 or samples >= 3
+
+// 5. Medical device risk: emergency calls plus outage.
+EmergencyCalls
+| where call_type == 'medical_device_failure'
+| summarize medical_calls=count(), p1=countif(priority=='P1') by gmina_code
+| join kind=inner (CurrentOutageByGmina() | where is_without_power) on gmina_code
+| order by p1 desc, medical_calls desc
+
+// 6. Alert effectiveness vs telecom coverage. Visual: scatter or table.
+let alert_rate = AlertDelivery | summarize sent=sum(messages_sent), delivered=sum(messages_delivered) by gmina_code | extend delivery_rate=delivered*1.0/sent;
+let telco = TelecomCoverage | summarize arg_max(event_time, *) by gmina_code;
+alert_rate
+| join kind=inner telco on gmina_code
+| project gmina_code, delivery_rate, coverage_pct
+| order by delivery_rate asc
+
+// 7. Heating point overflow with low telco. Rule: HeatingPoint_Full + Telecom_Blackout combined.
+HeatingPointStatus
+| summarize arg_max(event_time, *) by heating_point_id
+| extend fill_pct=occupancy*1.0/capacity
+| where fill_pct >= 0.95
+| join kind=leftouter (TelecomCoverage | summarize arg_max(event_time, *) by gmina_code) on gmina_code
+| project heating_point_id, gmina_code, fill_pct, coverage_pct, needs_medical_support
+
+// 8. Generator demand from care facilities under autonomy threshold.
+CareFacilities
+| where has_generator == false or generator_autonomy_hours < 2
+| summarize facilities=count(), required_kw=sum(power_need_kw) by gmina_code
+| join kind=leftouter (GeneratorDispatch | summarize dispatched_kw=sum(power_kw) by gmina_code) on gmina_code
+| extend kw_gap=required_kw-coalesce(dispatched_kw,0.0)
+| where kw_gap > 0
+| order by kw_gap desc

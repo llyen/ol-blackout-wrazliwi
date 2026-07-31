@@ -1,0 +1,15 @@
+gmina_code,gmina_name,first_critical_time,izz_score_at_snapshot,main_drivers
+2005003,gmina podlaskie-miejski-05-03,2026-01-15T21:14:38.016000+00:00,82.82,IWL + outage_hours + severe_cold + telecom_loss
+2001003,gmina podlaskie-południowy-01-03,2026-01-16T01:52:00.192000+00:00,80.89,IWL + outage_hours + severe_cold + telecom_loss
+2818005,gmina warmińsko-mazurskie-północny-18-05,2026-01-16T04:22:12.384000+00:00,79.85,IWL + outage_hours + severe_cold + telecom_loss
+2014002,gmina podlaskie-wschodni-14-02,2026-01-16T04:39:12.767999999+00:00,79.73,IWL + outage_hours + severe_cold + telecom_loss
+1425001,gmina mazowieckie-południowy-25-01,2026-01-16T05:14:04.608000+00:00,79.49,IWL + outage_hours + severe_cold + telecom_loss
+2808003,gmina warmińsko-mazurskie-wschodni-08-03,2026-01-16T06:00:14.687999999+00:00,79.16,IWL + outage_hours + severe_cold + telecom_loss
+2810003,gmina warmińsko-mazurskie-centralny-10-03,2026-01-16T06:14:13.440000+00:00,79.07,IWL + outage_hours + severe_cold + telecom_loss
+2006001,gmina podlaskie-północny-06-01,2026-01-16T06:28:52.416000+00:00,78.97,IWL + outage_hours + severe_cold + telecom_loss
+2803002,gmina warmińsko-mazurskie-zachodni-03-02,2026-01-16T08:31:46.368000+00:00,78.11,IWL + outage_hours + severe_cold + telecom_loss
+0623002,gmina lubelskie-miejski-23-02,2026-01-16T08:54:25.728000+00:00,77.96,IWL + outage_hours + severe_cold + telecom_loss
+1422003,gmina mazowieckie-centralny-22-03,2026-01-16T09:20:49.056000+00:00,77.77,IWL + outage_hours + severe_cold + telecom_loss
+2808001,gmina warmińsko-mazurskie-wschodni-08-01,2026-01-16T12:44:30.624000+00:00,76.36,IWL + outage_hours + severe_cold + telecom_loss
+0615003,gmina lubelskie-zachodni-15-03,2026-01-16T14:35:27.072000+00:00,75.59,IWL + outage_hours + severe_cold + telecom_loss
+1401001,gmina mazowieckie-południowy-01-01,2026-01-16T15:37:24.960000+00:00,75.16,IWL + outage_hours + severe_cold + telecom_loss

@@ -1,0 +1,36 @@
+flowchart LR
+  subgraph Sources[Źródła syntetyczne]
+    CSV[CSV dimensions and registries]
+    JSONL[JSONL realtime streams]
+  end
+  subgraph Ingest[Ingest]
+    ES[Fabric Eventstream / Custom endpoint]
+    LH[Fabric Lakehouse WinterShield_LH]
+  end
+  subgraph Realtime[Real-Time Intelligence]
+    EH[Eventhouse / KQL DB WinterShield_KQL]
+    RTD[Real-Time Dashboard]
+    ACT[Data Activator]
+  end
+  subgraph Analytics[Analytics]
+    NB[Notebooks IWL / IZZ / optimization / what-if]
+    DER[Derived tables]
+    SM[Semantic model]
+    PBI[Power BI report]
+  end
+  subgraph Action[Action layer]
+    APP[Fabric App / Rayfin]
+    AGENT[Data Agent]
+    TEAMS[Teams / workflow]
+    WB[Write-back tables]
+  end
+  CSV --> LH
+  JSONL --> ES --> EH
+  EH --> RTD
+  EH --> ACT --> TEAMS
+  LH --> NB --> DER --> LH
+  LH --> SM --> PBI
+  DER --> APP
+  EH --> AGENT
+  PBI --> APP
+  APP --> WB --> LH

@@ -1,0 +1,75 @@
+// Dashboard queries for WinterShield_KQL.
+// Each query has a comment naming the visual and expected use.
+
+// 1. KPI: current customers without power by gmina. Expected: top impacted gminas.
+CurrentOutageByGmina()
+| where is_without_power
+| summarize customers=sum(customers_without_power) by gmina_code
+| top 20 by customers desc
+
+// 2. Map tile: telecom coverage below 60%. Expected: gminas where SPO-3 via SMS may fail.
+TelecomCoverage
+| summarize arg_max(event_time, *) by gmina_code
+| where coverage_pct < 0.6
+| project gmina_code, coverage_pct, bts_total, bts_on_battery
+| order by coverage_pct asc
+
+// 3. 112 calls last 24h by type. Expected: no_heating and medical_device_failure grow after D0.
+EmergencyCalls
+| where event_time > ago(24h)
+| summarize calls=count(), p1=countif(priority == 'P1') by gmina_code, call_type
+| order by p1 desc, calls desc
+
+// 4. Heating points near full. Expected: points needing overflow plan.
+HeatingPointStatus
+| summarize arg_max(event_time, *) by heating_point_id
+| extend fill_pct=occupancy*100.0/capacity
+| where fill_pct > 85
+| project heating_point_id, gmina_code, fill_pct, needs_food, needs_medical_support, needs_generator
+| order by fill_pct desc
+
+// 5. SPO-3 delivery below 60%. Expected: gminas requiring alternate channels.
+AlertDelivery
+| summarize sent=sum(messages_sent), delivered=sum(messages_delivered), opened=sum(messages_opened) by gmina_code
+| extend delivery_rate=delivered*100.0/sent
+| where delivery_rate < 60
+| order by delivery_rate asc
+
+// 6. Welfare check outcomes. Expected: no_contact and evacuation counts by gmina.
+WelfareCheck
+| summarize last=max(event_time), contacted=countif(result=='contact_confirmed'), no_contact=countif(result=='no_contact'), evacuations=countif(result=='evacuation') by gmina_code
+| order by no_contact desc
+
+// 7. Generator dispatch status. Expected: planned/in_transit/deployed split.
+GeneratorDispatch
+| summarize generators=count(), total_kw=sum(power_kw) by status, target_type
+| order by status asc
+
+// 8. Outage cascade timeline. Expected: visible stage 1-3 growth.
+OutageEvents
+| summarize customers=sum(customers_without_power), affected_gminas=dcount(gmina_code) by bin(event_time, 2h), cascade_stage
+| order by event_time asc
+
+// 9. Severe weather map. Expected: powiats with feels_like below -20C.
+WeatherReadings
+| summarize arg_max(event_time, *) by powiat_code
+| where feels_like_c < -20
+| project powiat_code, temperature_c, feels_like_c, wind_kmh, snow_cm_30m, icing_index
+| order by feels_like_c asc
+
+// 10. Operational summary tile. Expected: one row for Real-Time Dashboard header.
+let outages = CurrentOutageByGmina() | where is_without_power | summarize gminas=dcount(gmina_code), customers=sum(customers_without_power);
+let calls = EmergencyCalls | where event_time > ago(24h) | summarize calls=count(), p1=countif(priority=='P1');
+let telco = TelecomCoverage | summarize arg_max(event_time, *) by gmina_code | summarize low_telco=countif(coverage_pct < 0.2);
+outages | extend join_key=1 | join kind=inner (calls | extend join_key=1) on join_key | join kind=inner (telco | extend join_key=1) on join_key | project-away join_key, join_key1, join_key2
+
+// 11. Care facilities likely needing generator. Expected: facilities for Activator triage.
+CareFacilities
+| where has_generator == false or generator_autonomy_hours < 2
+| project facility_id, facility_type, gmina_code, generator_autonomy_hours, power_need_kw
+
+// 12. Alert channel comparison. Expected: bar chart by RSO/SMS/local_radio.
+AlertDelivery
+| summarize sent=sum(messages_sent), delivered=sum(messages_delivered), opened=sum(messages_opened) by channel
+| extend delivery_rate=delivered*100.0/sent, open_rate=opened*100.0/delivered
+| order by delivery_rate desc

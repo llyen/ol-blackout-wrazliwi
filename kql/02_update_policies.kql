@@ -1,0 +1,103 @@
+// Tarcza Zimowa — materialized views and update-policy targets.
+// Cel: przyspieszyć dashboard, Data Activator i Data Agent przez utrzymanie
+// „ostatniego znanego stanu” oraz agregatów czasowych. W demie można użyć tych
+// obiektów jako funkcji; w produkcji update policies powinny zasilać tabele
+// materializowane po ingestii.
+
+// -----------------------------------------------------------------------------
+// CurrentOutageByGmina
+// Po co istnieje: pokazuje bieżący status awarii per gmina, bez skanowania całej
+// historii OutageEvents. Przyspiesza kafel „aktywni odbiorcy bez prądu”, ranking
+// gmin, regułę IZZ_Critical_Gmina i detekcję kaskady. Retencja tabeli źródłowej:
+// 90 dni; wynik jest logicznym snapshotem aktualnego stanu.
+.create-or-alter function with (folder='current', docstring='Latest outage status per gmina for dashboard and Activator') CurrentOutageByGmina() {
+    OutageEvents
+    | summarize arg_max(event_time, *) by gmina_code
+    | extend is_without_power = status != 'restored'
+}
+
+// -----------------------------------------------------------------------------
+// OutageHoursByGmina
+// Po co istnieje: liczy narastające godziny bez zasilania od pierwszego zdarzenia
+// do teraz albo do przywrócenia. Przyspiesza IZŻ, what-if oraz reguły eskalacyjne,
+// w których czas ekspozycji jest ważniejszy niż sama liczba odbiorców. Retencja:
+// dziedziczona z OutageEvents, rekomendowane materialized table 90 dni.
+.create-or-alter function with (folder='risk', docstring='Cumulative outage hours by gmina') OutageHoursByGmina() {
+    OutageEvents
+    | summarize outage_start=min(event_time), last_update=max(event_time), last_status=arg_max(event_time,status) by gmina_code
+    | extend hours_without_power = iff(last_status == 'restored', 0.0, datetime_diff('minute', now(), outage_start) / 60.0)
+}
+
+// -----------------------------------------------------------------------------
+// CurrentTelecomCoverage
+// Po co istnieje: trzyma ostatni odczyt pokrycia telco per gmina. Przyspiesza
+// mapę obszarów bez łączności, regułę Telecom_Blackout i ocenę skuteczności SPO-3.
+// Retencja źródła: 30 dni; cache 7 dni. Wynik zwykle odpytywany co kilka minut.
+.create-or-alter function with (folder='current', docstring='Latest telecom coverage per gmina') CurrentTelecomCoverage() {
+    TelecomCoverage
+    | summarize arg_max(event_time, *) by gmina_code
+    | extend telecom_blackout = coverage_pct < 0.2,
+             limited_delivery = coverage_pct < 0.6
+}
+
+// -----------------------------------------------------------------------------
+// CurrentHeatingPointStatus
+// Po co istnieje: pokazuje bieżące obłożenie punktów grzewczych i potrzeby.
+// Przyspiesza kafel „punkty pełne”, regułę HeatingPoint_Full oraz decyzję o
+// otwarciu punktu rezerwowego. Retencja źródła: 90 dni; materialized snapshot
+// może mieć retencję 30 dni.
+.create-or-alter function with (folder='current', docstring='Latest heating point status and fill ratio') CurrentHeatingPointStatus() {
+    HeatingPointStatus
+    | summarize arg_max(event_time, *) by heating_point_id
+    | extend fill_pct = occupancy * 100.0 / capacity,
+             is_full = occupancy * 1.0 / capacity >= 0.95
+}
+
+// -----------------------------------------------------------------------------
+// EmergencyCalls15m
+// Po co istnieje: agreguje zgłoszenia 112 w oknach 15-minutowych. Przyspiesza
+// wykres trendu, korelację z temperaturą i awarią oraz reguły wzrostu P1.
+// Retencja rekomendowana dla agregatu: 180 dni, bo jest to już dane podsumowane
+// bez treści zgłoszeń; źródło pozostaje 90 dni.
+.create-or-alter function with (folder='aggregates', docstring='112 calls aggregated in 15-minute windows') EmergencyCalls15m() {
+    EmergencyCalls
+    | summarize calls=count(),
+                p1=countif(priority == 'P1'),
+                hypothermia=countif(call_type == 'hypothermia'),
+                no_heating=countif(call_type == 'no_heating'),
+                medical_device_failure=countif(call_type == 'medical_device_failure')
+      by bin(event_time, 15m), gmina_code
+}
+
+// -----------------------------------------------------------------------------
+// CareFacilityAutonomyState
+// Po co istnieje: stan autonomii placówek opieki jest potrzebny dla alertu
+// CareFacility_Autonomy_Low. W realnym wdrożeniu tabela CareFacilities pochodzi
+// z Lakehouse/shortcut i jest łączona z CurrentOutageByGmina. Reguła przyspiesza
+// decyzję agregat vs ewakuacja. Retencja wyniku: minimum czas zdarzenia + audyt.
+.create-or-alter function with (folder='current', docstring='Care facilities with low backup power autonomy') CareFacilityAutonomyState() {
+    CareFacilities
+    | join kind=leftouter (CurrentOutageByGmina() | project gmina_code, is_without_power, customers_without_power) on gmina_code
+    | extend has_power_risk = coalesce(is_without_power, false),
+             autonomy_low = has_generator == false or generator_autonomy_hours < 2,
+             recommended_action = case(autonomy_low and has_power_risk, 'dispatch_generator_or_evacuation',
+                                       autonomy_low, 'prepare_generator',
+                                       'monitor')
+    | project facility_id, facility_type, gmina_code, current_occupancy, has_generator,
+              generator_autonomy_hours, power_need_kw, has_power_risk, autonomy_low, recommended_action
+}
+
+// -----------------------------------------------------------------------------
+// Example update policy targets for production hardening.
+// W demie pozostają jako wzorzec; przed uruchomieniem w Fabric należy utworzyć
+// fizyczne tabele docelowe i dopasować query do kontraktu ingestii.
+//
+// .create-merge table CurrentOutageState (gmina_code:string, event_time:datetime, status:string, customers_without_power:long, is_without_power:bool)
+// .alter table CurrentOutageState policy retention softdelete = 90d recoverability = enabled
+// .alter table CurrentOutageState policy caching hot = 14d
+// .alter table CurrentOutageState policy update @'[{"IsEnabled": true, "Source": "OutageEvents", "Query": "OutageEvents | summarize arg_max(event_time, *) by gmina_code | extend is_without_power=status != ''restored'' | project gmina_code,event_time,status,customers_without_power,is_without_power", "IsTransactional": false, "PropagateIngestionProperties": true}]'
+//
+// .create-merge table EmergencyCallsAgg15m (event_time:datetime, gmina_code:string, calls:long, p1:long, hypothermia:long, no_heating:long, medical_device_failure:long)
+// .alter table EmergencyCallsAgg15m policy retention softdelete = 180d recoverability = enabled
+// .alter table EmergencyCallsAgg15m policy caching hot = 30d
+// .alter table EmergencyCallsAgg15m policy update @'[{"IsEnabled": true, "Source": "EmergencyCalls", "Query": "EmergencyCalls | summarize calls=count(), p1=countif(priority == ''P1''), hypothermia=countif(call_type == ''hypothermia''), no_heating=countif(call_type == ''no_heating''), medical_device_failure=countif(call_type == ''medical_device_failure'') by bin(event_time, 15m), gmina_code", "IsTransactional": false, "PropagateIngestionProperties": true}]'

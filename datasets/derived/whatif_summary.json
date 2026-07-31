@@ -1,0 +1,6 @@
+{
+  "baseline_critical_gminas": 14,
+  "whatif_critical_gminas": 104,
+  "additional_critical_gminas": 90,
+  "assumption": "awaria +12h, temperatura -5C, agregaty -30%"
+}

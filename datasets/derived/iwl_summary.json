@@ -1,0 +1,7 @@
+{
+  "gminas": 2477,
+  "avg_iwl": 63.03,
+  "p90_iwl": 79.83,
+  "top_gmina": "2817005",
+  "method": "min-max normalizacja, suma ważona wg dim_vulnerability_factors, skalowanie 0-100"
+}

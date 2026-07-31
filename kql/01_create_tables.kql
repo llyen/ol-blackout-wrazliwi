@@ -1,0 +1,153 @@
+// Tarcza Zimowa — Eventhouse schema for BLACKOUT / ZIMA.
+// Dane wejściowe są JSONL generowane przez generate_datasets.py (seed=42).
+// Ten plik tworzy komplet tabel dla wszystkich strumieni real-time, mapowania JSON,
+// polityki retencji i polityki cache. Wolumeny podane w komentarzach odnoszą się
+// do wygenerowanych danych demo w katalogu datasets/.
+
+// -----------------------------------------------------------------------------
+// weather_readings.jsonl
+// Zawiera odczyty pogody per powiat co 30 minut w osi D-2…D+7:
+// temperatura, temperatura odczuwalna, wiatr, opad śniegu, indeks oblodzenia.
+// Wolumen demo: 201020 rekordów. Ziarno: event_time + powiat_code.
+// Retencja: 30 dni — wystarcza na pokaz i analizę po zdarzeniu; cache 7 dni,
+// bo dashboard operacyjny najczęściej czyta bieżące okna.
+.create-merge table WeatherReadings (
+    event_time:datetime,
+    powiat_code:string,
+    temperature_c:real,
+    feels_like_c:real,
+    wind_kmh:real,
+    snow_cm_30m:real,
+    icing_index:real
+)
+.alter table WeatherReadings policy retention softdelete = 30d recoverability = enabled
+.alter table WeatherReadings policy caching hot = 7d
+.create-or-alter table WeatherReadings ingestion json mapping 'weather_readings_mapping' '[{"column":"event_time","path":"$.event_time","datatype":"datetime"},{"column":"powiat_code","path":"$.powiat_code","datatype":"string"},{"column":"temperature_c","path":"$.temperature_c","datatype":"real"},{"column":"feels_like_c","path":"$.feels_like_c","datatype":"real"},{"column":"wind_kmh","path":"$.wind_kmh","datatype":"real"},{"column":"snow_cm_30m","path":"$.snow_cm_30m","datatype":"real"},{"column":"icing_index","path":"$.icing_index","datatype":"real"}]'
+
+// -----------------------------------------------------------------------------
+// outage_events.jsonl
+// Zdarzenia kaskadowej awarii sieci per gmina: element sieci, status, odbiorcy
+// bez prądu, ETA i etap kaskady. Częstotliwość: aktualizacje co ok. 2h dla gmin
+// dotkniętych awarią. Wolumen demo: 6650 rekordów. Ziarno: event_time + outage_id.
+// Retencja: 90 dni dla odtworzenia przebiegu decyzji; cache 14 dni dla KQL.
+.create-merge table OutageEvents (
+    event_time:datetime,
+    outage_id:string,
+    grid_asset_id:string,
+    gmina_code:string,
+    status:string,
+    customers_without_power:long,
+    eta_restore_time:datetime,
+    cascade_stage:int,
+    root_cause:string
+)
+.alter table OutageEvents policy retention softdelete = 90d recoverability = enabled
+.alter table OutageEvents policy caching hot = 14d
+.create-or-alter table OutageEvents ingestion json mapping 'outage_events_mapping' '[{"column":"event_time","path":"$.event_time","datatype":"datetime"},{"column":"outage_id","path":"$.outage_id","datatype":"string"},{"column":"grid_asset_id","path":"$.grid_asset_id","datatype":"string"},{"column":"gmina_code","path":"$.gmina_code","datatype":"string"},{"column":"status","path":"$.status","datatype":"string"},{"column":"customers_without_power","path":"$.customers_without_power","datatype":"long"},{"column":"eta_restore_time","path":"$.eta_restore_time","datatype":"datetime"},{"column":"cascade_stage","path":"$.cascade_stage","datatype":"int"},{"column":"root_cause","path":"$.root_cause","datatype":"string"}]'
+
+// -----------------------------------------------------------------------------
+// telecom_coverage.jsonl
+// Stan pokrycia telekomunikacyjnego per gmina co 1 godzinę; modeluje wyczerpanie
+// baterii BTS po 4–8h. Wolumen demo: 522647 rekordów. Ziarno: event_time + gmina_code.
+// Retencja 30 dni; cache 7 dni, bo reguły Activatora patrzą na ostatnie godziny.
+.create-merge table TelecomCoverage (
+    event_time:datetime,
+    gmina_code:string,
+    bts_total:int,
+    bts_on_battery:int,
+    coverage_pct:real,
+    battery_hours_remaining:real
+)
+.alter table TelecomCoverage policy retention softdelete = 30d recoverability = enabled
+.alter table TelecomCoverage policy caching hot = 7d
+.create-or-alter table TelecomCoverage ingestion json mapping 'telecom_coverage_mapping' '[{"column":"event_time","path":"$.event_time","datatype":"datetime"},{"column":"gmina_code","path":"$.gmina_code","datatype":"string"},{"column":"bts_total","path":"$.bts_total","datatype":"int"},{"column":"bts_on_battery","path":"$.bts_on_battery","datatype":"int"},{"column":"coverage_pct","path":"$.coverage_pct","datatype":"real"},{"column":"battery_hours_remaining","path":"$.battery_hours_remaining","datatype":"real"}]'
+
+// -----------------------------------------------------------------------------
+// emergency_calls.jsonl
+// Syntetyczne zgłoszenia 112: wychłodzenie, brak ogrzewania, awaria sprzętu
+// medycznego, uwięzieni w pojeździe, prośba o welfare check. Wolumen: 5285.
+// Ziarno: call_id. Retencja 90 dni dla analizy przebiegu kryzysu; cache 14 dni.
+.create-merge table EmergencyCalls (
+    event_time:datetime,
+    call_id:string,
+    gmina_code:string,
+    call_type:string,
+    priority:string,
+    description:string
+)
+.alter table EmergencyCalls policy retention softdelete = 90d recoverability = enabled
+.alter table EmergencyCalls policy caching hot = 14d
+.create-or-alter table EmergencyCalls ingestion json mapping 'emergency_calls_mapping' '[{"column":"event_time","path":"$.event_time","datatype":"datetime"},{"column":"call_id","path":"$.call_id","datatype":"string"},{"column":"gmina_code","path":"$.gmina_code","datatype":"string"},{"column":"call_type","path":"$.call_type","datatype":"string"},{"column":"priority","path":"$.priority","datatype":"string"},{"column":"description","path":"$.description","datatype":"string"}]'
+
+// -----------------------------------------------------------------------------
+// heating_point_status.jsonl
+// Meldunki punktów grzewczych: status, obłożenie, potrzeby żywnościowe, medyczne
+// i zapotrzebowanie na agregat. Wolumen demo: 330 rekordów. Ziarno: event_time +
+// heating_point_id. Retencja 90 dni; cache 14 dni.
+.create-merge table HeatingPointStatus (
+    event_time:datetime,
+    heating_point_id:string,
+    gmina_code:string,
+    status:string,
+    occupancy:int,
+    capacity:int,
+    needs_food:bool,
+    needs_medical_support:bool,
+    needs_generator:bool
+)
+.alter table HeatingPointStatus policy retention softdelete = 90d recoverability = enabled
+.alter table HeatingPointStatus policy caching hot = 14d
+.create-or-alter table HeatingPointStatus ingestion json mapping 'heating_point_status_mapping' '[{"column":"event_time","path":"$.event_time","datatype":"datetime"},{"column":"heating_point_id","path":"$.heating_point_id","datatype":"string"},{"column":"gmina_code","path":"$.gmina_code","datatype":"string"},{"column":"status","path":"$.status","datatype":"string"},{"column":"occupancy","path":"$.occupancy","datatype":"int"},{"column":"capacity","path":"$.capacity","datatype":"int"},{"column":"needs_food","path":"$.needs_food","datatype":"bool"},{"column":"needs_medical_support","path":"$.needs_medical_support","datatype":"bool"},{"column":"needs_generator","path":"$.needs_generator","datatype":"bool"}]'
+
+// -----------------------------------------------------------------------------
+// generator_dispatch.jsonl
+// Wydania i rozstawienia agregatów: generator, cel, gmina, status i moc. Wolumen:
+// 260 rekordów. Ziarno: dispatch_id. Retencja 180 dni dla rozliczalności zasobów;
+// cache 30 dni, bo plan logistyczny jest często odczytywany po zdarzeniu.
+.create-merge table GeneratorDispatch (
+    event_time:datetime,
+    dispatch_id:string,
+    generator_id:string,
+    target_type:string,
+    gmina_code:string,
+    status:string,
+    power_kw:real
+)
+.alter table GeneratorDispatch policy retention softdelete = 180d recoverability = enabled
+.alter table GeneratorDispatch policy caching hot = 30d
+.create-or-alter table GeneratorDispatch ingestion json mapping 'generator_dispatch_mapping' '[{"column":"event_time","path":"$.event_time","datatype":"datetime"},{"column":"dispatch_id","path":"$.dispatch_id","datatype":"string"},{"column":"generator_id","path":"$.generator_id","datatype":"string"},{"column":"target_type","path":"$.target_type","datatype":"string"},{"column":"gmina_code","path":"$.gmina_code","datatype":"string"},{"column":"status","path":"$.status","datatype":"string"},{"column":"power_kw","path":"$.power_kw","datatype":"real"}]'
+
+// -----------------------------------------------------------------------------
+// welfare_check.jsonl
+// Wyniki wizyt kontrolnych u fikcyjnych osób priorytetowych. Nie zawiera danych
+// osobowych jawnych, tylko person_token. Wolumen demo: 202 rekordy. Ziarno: visit_id.
+// Retencja 90 dni w demie; w produkcji minimalna, zgodna z przepisami.
+.create-merge table WelfareCheck (
+    event_time:datetime,
+    visit_id:string,
+    person_token:string,
+    gmina_code:string,
+    team_id:string,
+    result:string
+)
+.alter table WelfareCheck policy retention softdelete = 90d recoverability = enabled
+.alter table WelfareCheck policy caching hot = 14d
+.create-or-alter table WelfareCheck ingestion json mapping 'welfare_check_mapping' '[{"column":"event_time","path":"$.event_time","datatype":"datetime"},{"column":"visit_id","path":"$.visit_id","datatype":"string"},{"column":"person_token","path":"$.person_token","datatype":"string"},{"column":"gmina_code","path":"$.gmina_code","datatype":"string"},{"column":"team_id","path":"$.team_id","datatype":"string"},{"column":"result","path":"$.result","datatype":"string"}]'
+
+// -----------------------------------------------------------------------------
+// alert_delivery.jsonl
+// Wysyłka i dostarczenie komunikatów SPO-3 kanałami RSO/SMS/local_radio per gmina.
+// Wolumen demo: 7431 rekordów. Ziarno: event_time + gmina_code + channel.
+// Retencja 180 dni dla rozliczalności komunikacji publicznej; cache 30 dni.
+.create-merge table AlertDelivery (
+    event_time:datetime,
+    gmina_code:string,
+    channel:string,
+    messages_sent:long,
+    messages_delivered:long,
+    messages_opened:long,
+    spo_code:string
+)
+.alter table AlertDelivery policy retention softdelete = 180d recoverability = enabled
+.alter table AlertDelivery policy caching hot = 30d
+.create-or-alter table AlertDelivery ingestion json mapping 'alert_delivery_mapping' '[{"column":"event_time","path":"$.event_time","datatype":"datetime"},{"column":"gmina_code","path":"$.gmina_code","datatype":"string"},{"column":"channel","path":"$.channel","datatype":"string"},{"column":"messages_sent","path":"$.messages_sent","datatype":"long"},{"column":"messages_delivered","path":"$.messages_delivered","datatype":"long"},{"column":"messages_opened","path":"$.messages_opened","datatype":"long"},{"column":"spo_code","path":"$.spo_code","datatype":"string"}]'

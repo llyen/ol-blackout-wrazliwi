@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+datasets/derived/dry_run_*.jsonl
+
+
+# Duze pliki danych - regenerowane deterministycznie (seed=42) przez generate_datasets.py
+datasets/telecom_coverage.jsonl
+datasets/weather_readings.jsonl
