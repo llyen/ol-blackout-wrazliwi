@@ -10,6 +10,7 @@ Uzycie:
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import queue
 import subprocess
@@ -29,6 +30,10 @@ CONFIG = ROOT / "scenario" / "scenario.json"
 # Tabele Eventhouse maja nazwy PascalCase, a pliki zrodlowe prefiks fact_.
 # Mapowanie przychodzi z scenario.json i jest ustawiane przy starcie.
 FILES: dict = {}
+
+# Kolumna czasu rozni sie miedzy scenariuszami (timestamp / event_time),
+# a wystepuje zarowno w poleceniach KQL, jak i w rekordach JSONL.
+TIME_COL = "timestamp"
 
 
 def stream_file(stream: str) -> str:
@@ -123,6 +128,11 @@ class KustoClient:
                 # juz nawiazane. Bez tej galezi ciezkie operacje (.clear na kilkuset
                 # tysiacach wierszy) przerywaly caly przebieg zamiast zostac ponowione.
                 last = f"timeout odczytu: {exc}"
+            except (OSError, http.client.HTTPException) as exc:
+                # Przy gestym oknie live (dziesiatki tysiecy zdarzen) usluga potrafi
+                # zerwac polaczenie (WinError 10054 / RemoteDisconnected). To stan
+                # przejsciowy, wiec ponawiamy zamiast konczyc odtwarzanie.
+                last = f"polaczenie przerwane: {exc}"
             time.sleep(min(2 ** attempt, 15))
         raise SystemExit(f"Nie udalo sie wykonac zadania po 5 probach: {last}")
 
@@ -177,7 +187,7 @@ class KustoClient:
         return "Timeout"
 
     def delete_from(self, table: str, cutoff_iso: str):
-        csl = f".delete table {table} records <| {table} | where timestamp >= datetime({cutoff_iso})"
+        csl = f".delete table {table} records <| {table} | where {TIME_COL} >= datetime({cutoff_iso})"
         self.mgmt(csl)
 
     def rewrite_timeline(self, table: str, live_start_iso: str, anchor_iso: str, speed: float) -> str:
@@ -188,9 +198,9 @@ class KustoClient:
         a faza live plynnie kontynuuje os czasu az do biezacego 'teraz'.
         """
         csl = (f".set-or-replace async {table} <| {table} "
-               f"| where timestamp < datetime({live_start_iso}) "
-               f"| extend timestamp = datetime({anchor_iso}) "
-               f"+ (timestamp - datetime({live_start_iso})) / {speed}")
+               f"| where {TIME_COL} < datetime({live_start_iso}) "
+               f"| extend {TIME_COL} = datetime({anchor_iso}) "
+               f"+ ({TIME_COL} - datetime({live_start_iso})) / {speed}")
         return self.mgmt(csl)["Tables"][0]["Rows"][0][0]
 
 
@@ -281,7 +291,7 @@ def load_events(streams, start, end):
                 if not line:
                     continue
                 ev = json.loads(line)
-                ts = parse_ts(ev["timestamp"])
+                ts = parse_ts(ev[TIME_COL])
                 if start and ts < start:
                     continue
                 if end and ts > end:
@@ -372,7 +382,7 @@ def shift_background(client: KustoClient, streams, live_start: datetime, anchor:
         if state != "Completed":
             raise SystemExit(f"Przesuniecie osi czasu {stream} nie powiodlo sie: stan={state}")
         rows = client.scalar(f"{stream} | count")
-        oldest = client.scalar(f"{stream} | summarize min(timestamp)")
+        oldest = client.scalar(f"{stream} | summarize min({TIME_COL})")
         print(f"  [OK] {stream}: {rows} wierszy tla, najstarszy {oldest}")
     print("  Tlo konczy sie dokladnie w chwili startu fazy live.")
 
@@ -383,15 +393,16 @@ def prune(client: KustoClient, streams, keep_hours: float):
     for stream in streams:
         try:
             client.mgmt(f".delete table {stream} records <| {stream} "
-                        f"| where timestamp < ago({keep_hours}h)")
+                        f"| where {TIME_COL} < ago({keep_hours}h)")
         except BaseException as exc:  # noqa: BLE001 - porzadki nie moga przerwac demo
             print(f"    [uwaga] {stream}: {exc}")
 
 
 def run(args):
     cfg = load_config(CONFIG)
-    global FILES
+    global FILES, TIME_COL
     FILES = cfg.get("files", {})
+    TIME_COL = cfg.get("timeColumn", "timestamp")
     streams = args.streams.split(",") if args.streams else cfg["streams"]
     client = KustoClient(cfg["cluster"], cfg["database"], TokenCache())
 
@@ -484,7 +495,7 @@ def run(args):
                 time.sleep(min(behind, args.tick))
             if rewrite:
                 ev = dict(ev)
-                ev["timestamp"] = stamp(ts, cycle_anchor)
+                ev[TIME_COL] = stamp(ts, cycle_anchor)
             payload = {k: v for k, v in ev.items() if k in columns[stream]}
             buffers[stream].append(json.dumps(payload, ensure_ascii=False))
             buffered += 1

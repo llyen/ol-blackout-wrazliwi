@@ -1,0 +1,29 @@
+{
+  "cluster": "https://trd-bv9kuej96btp7bpuq7.z6.kusto.fabric.microsoft.com",
+  "database": "OL_BLK_Eventhouse",
+  "workspaceId": "68e1369e-bc4d-4c87-a747-e3fd78c21f21",
+  "lakehouseId": "49e3e20d-6da3-44b0-8273-ad6cd8290359",
+  "onelake": "https://onelake.dfs.fabric.microsoft.com/68e1369e-bc4d-4c87-a747-e3fd78c21f21/49e3e20d-6da3-44b0-8273-ad6cd8290359/Files/streams",
+  "timeColumn": "event_time",
+  "liveStart": "2026-01-14T12:00:00+02:00",
+  "streams": [
+    "OutageEvents",
+    "TelecomCoverage",
+    "EmergencyCalls",
+    "HeatingPointStatus",
+    "GeneratorDispatch",
+    "WelfareCheck",
+    "AlertDelivery",
+    "WeatherReadings"
+  ],
+  "files": {
+    "OutageEvents": "outage_events",
+    "TelecomCoverage": "telecom_coverage",
+    "EmergencyCalls": "emergency_calls",
+    "HeatingPointStatus": "heating_point_status",
+    "GeneratorDispatch": "generator_dispatch",
+    "WelfareCheck": "welfare_check",
+    "AlertDelivery": "alert_delivery",
+    "WeatherReadings": "weather_readings"
+  }
+}

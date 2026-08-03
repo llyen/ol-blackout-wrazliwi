@@ -1,75 +1,231 @@
-// Dashboard queries for WinterShield_KQL.
-// Each query has a comment naming the visual and expected use.
+// 03_dashboard_queries.kql - kafelki Real-Time Dashboard scenariusza „Tarcza Zimowa".
+//
+// Format naglowka jest kontraktem dla deploy\create_dashboard.ps1: numer, tytul i strona.
+// Zmienne _startTime i _endTime pochodza z parametru zakresu czasu dashboardu; kafelek
+// bez nich pokazuje stan biezacy niezaleznie od ustawionego okna.
+//
+// Zasada wydajnosci: najpierw filtr czasu, potem agregacja, na koncu join z wymiarem.
+// Ma to tu wieksze znaczenie niz w innych scenariuszach, bo TelecomCoverage i
+// WeatherReadings licza setki tysiecy wierszy, a wymiary najwyzej kilka tysiecy.
 
-// 1. KPI: current customers without power by gmina. Expected: top impacted gminas.
-CurrentOutageByGmina()
-| where is_without_power
-| summarize customers=sum(customers_without_power) by gmina_code
-| top 20 by customers desc
-
-// 2. Map tile: telecom coverage below 60%. Expected: gminas where SPO-3 via SMS may fail.
-TelecomCoverage
-| summarize arg_max(event_time, *) by gmina_code
-| where coverage_pct < 0.6
-| project gmina_code, coverage_pct, bts_total, bts_on_battery
-| order by coverage_pct asc
-
-// 3. 112 calls last 24h by type. Expected: no_heating and medical_device_failure grow after D0.
-EmergencyCalls
-| where event_time > ago(24h)
-| summarize calls=count(), p1=countif(priority == 'P1') by gmina_code, call_type
-| order by p1 desc, calls desc
-
-// 4. Heating points near full. Expected: points needing overflow plan.
-HeatingPointStatus
-| summarize arg_max(event_time, *) by heating_point_id
-| extend fill_pct=occupancy*100.0/capacity
-| where fill_pct > 85
-| project heating_point_id, gmina_code, fill_pct, needs_food, needs_medical_support, needs_generator
-| order by fill_pct desc
-
-// 5. SPO-3 delivery below 60%. Expected: gminas requiring alternate channels.
-AlertDelivery
-| summarize sent=sum(messages_sent), delivered=sum(messages_delivered), opened=sum(messages_opened) by gmina_code
-| extend delivery_rate=delivered*100.0/sent
-| where delivery_rate < 60
-| order by delivery_rate asc
-
-// 6. Welfare check outcomes. Expected: no_contact and evacuation counts by gmina.
-WelfareCheck
-| summarize last=max(event_time), contacted=countif(result=='contact_confirmed'), no_contact=countif(result=='no_contact'), evacuations=countif(result=='evacuation') by gmina_code
-| order by no_contact desc
-
-// 7. Generator dispatch status. Expected: planned/in_transit/deployed split.
-GeneratorDispatch
-| summarize generators=count(), total_kw=sum(power_kw) by status, target_type
-| order by status asc
-
-// 8. Outage cascade timeline. Expected: visible stage 1-3 growth.
+// 01. Kafelek: „Gminy bez zasilania” | Strona: Obraz sytuacji
 OutageEvents
-| summarize customers=sum(customers_without_power), affected_gminas=dcount(gmina_code) by bin(event_time, 2h), cascade_stage
-| order by event_time asc
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, status, customers_without_power, cascade_stage) by gmina_code
+| where status != 'restored'
+| join kind=inner (dim_gmina | project gmina_code, gmina_name, lat, lon) on gmina_code
+| project gmina_name, lat, lon, Odbiorcy = customers_without_power, Etap = cascade_stage, status
 
-// 9. Severe weather map. Expected: powiats with feels_like below -20C.
-WeatherReadings
-| summarize arg_max(event_time, *) by powiat_code
-| where feels_like_c < -20
-| project powiat_code, temperature_c, feels_like_c, wind_kmh, snow_cm_30m, icing_index
-| order by feels_like_c asc
+// 02. Kafelek: „Puls sytuacji kryzysowej” | Strona: Obraz sytuacji
+let awarie = OutageEvents | where event_time between (_startTime .. _endTime)
+    | summarize arg_max(event_time, status, customers_without_power) by gmina_code
+    | where status != 'restored';
+let zgloszenia = EmergencyCalls | where event_time between (_startTime .. _endTime);
+let telco = TelecomCoverage | where event_time between (_startTime .. _endTime)
+    | summarize arg_max(event_time, coverage_pct) by gmina_code;
+let punkty = HeatingPointStatus | where event_time between (_startTime .. _endTime)
+    | summarize arg_max(event_time, status, occupancy, capacity) by heating_point_id;
+let agregaty = GeneratorDispatch | where event_time between (_startTime .. _endTime)
+    | summarize arg_max(event_time, status, power_kw) by dispatch_id;
+union
+  (awarie     | summarize Wskaznik = 'Gminy bez pradu', Wartosc = dcount(gmina_code)),
+  (awarie     | summarize Wskaznik = 'Odbiorcy bez pradu', Wartosc = sum(customers_without_power)),
+  (zgloszenia | summarize Wskaznik = 'Zgloszenia 112', Wartosc = count()),
+  (zgloszenia | summarize Wskaznik = 'W tym priorytet P1', Wartosc = countif(priority == 'P1')),
+  (telco      | summarize Wskaznik = 'Gminy bez lacznosci', Wartosc = countif(coverage_pct < 0.2)),
+  (punkty     | summarize Wskaznik = 'Osoby w punktach grzewczych', Wartosc = sum(occupancy)),
+  (agregaty   | summarize Wskaznik = 'Agregaty w dyspozycji', Wartosc = count())
 
-// 10. Operational summary tile. Expected: one row for Real-Time Dashboard header.
-let outages = CurrentOutageByGmina() | where is_without_power | summarize gminas=dcount(gmina_code), customers=sum(customers_without_power);
-let calls = EmergencyCalls | where event_time > ago(24h) | summarize calls=count(), p1=countif(priority=='P1');
-let telco = TelecomCoverage | summarize arg_max(event_time, *) by gmina_code | summarize low_telco=countif(coverage_pct < 0.2);
-outages | extend join_key=1 | join kind=inner (calls | extend join_key=1) on join_key | join kind=inner (telco | extend join_key=1) on join_key | project-away join_key, join_key1, join_key2
+// 03. Kafelek: „Rozwoj kaskady awarii” | Strona: Obraz sytuacji
+OutageEvents
+| where event_time between (_startTime .. _endTime)
+| summarize Odbiorcy = sum(customers_without_power), Gminy = dcount(gmina_code)
+    by Czas = bin(event_time, 1m), Etap = strcat('Etap ', tostring(cascade_stage))
+| order by Czas asc
 
-// 11. Care facilities likely needing generator. Expected: facilities for Activator triage.
-CareFacilities
-| where has_generator == false or generator_autonomy_hours < 2
-| project facility_id, facility_type, gmina_code, generator_autonomy_hours, power_need_kw
+// 04. Kafelek: „Skala awarii wedlug wojewodztw” | Strona: Obraz sytuacji
+OutageEvents
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, status, customers_without_power) by gmina_code
+| where status != 'restored'
+| join kind=inner (dim_gmina | project gmina_code, voivodeship_code) on gmina_code
+| summarize Odbiorcy = sum(customers_without_power), Gminy = dcount(gmina_code) by voivodeship_code
+| join kind=inner (dim_voivodeship | project voivodeship_code, voivodeship_name) on voivodeship_code
+| project Wojewodztwo = voivodeship_name, Odbiorcy, Gminy
+| order by Odbiorcy desc
 
-// 12. Alert channel comparison. Expected: bar chart by RSO/SMS/local_radio.
+// 05. Kafelek: „Gminy wymagajace decyzji” | Strona: Obraz sytuacji
+let telco = TelecomCoverage | where event_time between (_startTime .. _endTime)
+    | summarize arg_max(event_time, coverage_pct) by gmina_code;
+OutageEvents
+| where event_time between (_startTime .. _endTime)
+| summarize Poczatek = min(event_time), arg_max(event_time, status, customers_without_power, root_cause, eta_restore_time) by gmina_code
+| where status != 'restored'
+| extend Godzin = round(todouble(datetime_diff('minute', event_time, Poczatek)) / 60.0, 1)
+| join kind=leftouter (telco) on gmina_code
+| join kind=inner (dim_gmina | project gmina_code, gmina_name, voivodeship_code) on gmina_code
+| join kind=inner (dim_voivodeship | project voivodeship_code, voivodeship_name) on voivodeship_code
+| project Gmina = gmina_name, Wojewodztwo = voivodeship_name, Odbiorcy = customers_without_power,
+          Godzin, Lacznosc = round(coalesce(coverage_pct, 1.0) * 100, 0), Przyczyna = root_cause,
+          Przywrocenie = eta_restore_time
+| order by Odbiorcy desc
+| take 40
+
+// 06. Kafelek: „Ludnosc wrazliwa w gminach bez zasilania” | Strona: Ludnosc wrazliwa
+OutageEvents
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, status, customers_without_power) by gmina_code
+| where status != 'restored'
+| join kind=inner (PopulationVulnerability | project gmina_code, population, vulnerable_population_est, rescue_travel_time_min) on gmina_code
+| join kind=inner (dim_gmina | project gmina_code, gmina_name) on gmina_code
+| extend Udzial = todouble(customers_without_power) / todouble(max_of(population, 1))
+| extend Wrazliwi = tolong(vulnerable_population_est * min_of(Udzial, 1.0))
+| project Gmina = gmina_name, Wrazliwi, Odbiorcy = customers_without_power,
+          DojazdMin = rescue_travel_time_min, Populacja = population
+| order by Wrazliwi desc
+| take 40
+
+// 07. Kafelek: „Osoby wrazliwe bez zasilania wedlug wojewodztw” | Strona: Ludnosc wrazliwa
+OutageEvents
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, status, customers_without_power) by gmina_code
+| where status != 'restored'
+| join kind=inner (PopulationVulnerability | project gmina_code, population, vulnerable_population_est) on gmina_code
+| extend Wrazliwi = tolong(vulnerable_population_est * min_of(todouble(customers_without_power) / todouble(max_of(population, 1)), 1.0))
+| join kind=inner (dim_gmina | project gmina_code, voivodeship_code) on gmina_code
+| summarize Wrazliwi = sum(Wrazliwi) by voivodeship_code
+| join kind=inner (dim_voivodeship | project voivodeship_code, voivodeship_name) on voivodeship_code
+| project Wojewodztwo = voivodeship_name, Wrazliwi
+| order by Wrazliwi desc
+
+// 08. Kafelek: „Struktura osob priorytetowych” | Strona: Ludnosc wrazliwa
+PriorityPersons
+| summarize Osoby = count() by Kategoria = category
+| order by Osoby desc
+
+// 09. Kafelek: „Zgloszenia 112 wedlug rodzaju” | Strona: Ludnosc wrazliwa
+EmergencyCalls
+| where event_time between (_startTime .. _endTime)
+| summarize Zgloszenia = count() by Czas = bin(event_time, 1m), Rodzaj = call_type
+| order by Czas asc
+
+// 10. Kafelek: „Osoby priorytetowe w gminach odcietych” | Strona: Ludnosc wrazliwa
+let bezPradu = OutageEvents | where event_time between (_startTime .. _endTime)
+    | summarize arg_max(event_time, status) by gmina_code | where status != 'restored' | project gmina_code;
+let telco = TelecomCoverage | where event_time between (_startTime .. _endTime)
+    | summarize arg_max(event_time, coverage_pct) by gmina_code;
+PriorityPersons
+| where category in ('dialysis', 'home_oxygen', 'powered_medical_device')
+| join kind=inner (bezPradu) on gmina_code
+| join kind=leftouter (telco) on gmina_code
+| join kind=inner (dim_gmina | project gmina_code, gmina_name) on gmina_code
+| project Osoba = person_token, Kategoria = category, Gmina = gmina_name,
+          AutonomiaH = medical_device_autonomy_hours,
+          Lacznosc = round(coalesce(coverage_pct, 1.0) * 100, 0), Samotnie = is_living_alone
+| order by AutonomiaH asc
+| take 40
+
+// 11. Kafelek: „Punkty grzewcze w terenie” | Strona: Cieplo i opieka
+HeatingPointStatus
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, status, occupancy, capacity, needs_generator, needs_medical_support) by heating_point_id
+| join kind=inner (HeatingPoints | project heating_point_id, heating_point_type, lat, lon) on heating_point_id
+| extend Zapelnienie = round(todouble(occupancy) * 100.0 / todouble(max_of(capacity, 1)), 0)
+| project heating_point_id, lat, lon, Zapelnienie, Osoby = occupancy, Typ = heating_point_type, status
+
+// 12. Kafelek: „Zapelnienie punktow grzewczych” | Strona: Cieplo i opieka
+HeatingPointStatus
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, occupancy, capacity, gmina_code) by heating_point_id
+| extend Zapelnienie = round(todouble(occupancy) * 100.0 / todouble(max_of(capacity, 1)), 0)
+| join kind=inner (dim_gmina | project gmina_code, gmina_name) on gmina_code
+| project Punkt = strcat(gmina_name, ' / ', heating_point_id), Zapelnienie, Osoby = occupancy
+| order by Zapelnienie desc
+| take 20
+
+// 13. Kafelek: „Placowki opieki wymagajace zasilania” | Strona: Cieplo i opieka
+CareFacilityAutonomyState()
+| where recommended_action != 'monitor'
+| join kind=inner (dim_gmina | project gmina_code, gmina_name) on gmina_code
+| project Placowka = facility_id, Typ = facility_type, Gmina = gmina_name,
+          Podopieczni = current_occupancy, AutonomiaH = generator_autonomy_hours,
+          MocKW = power_need_kw, Rekomendacja = recommended_action
+| order by Podopieczni desc
+| take 40
+
+// 14. Kafelek: „Agregaty wedlug stanu dysponowania” | Strona: Cieplo i opieka
+GeneratorDispatch
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, status, power_kw, target_type) by dispatch_id
+| summarize Agregaty = count(), MocKW = sum(power_kw) by Stan = status, Cel = target_type
+| order by Agregaty desc
+
+// 15. Kafelek: „Rozdysponowana moc w czasie” | Strona: Cieplo i opieka
+GeneratorDispatch
+| where event_time between (_startTime .. _endTime)
+| summarize MocKW = sum(power_kw), Dyspozycje = count() by Czas = bin(event_time, 1m)
+| order by Czas asc
+
+// 16. Kafelek: „Gminy bez lacznosci” | Strona: Lacznosc i ostrzeganie
+TelecomCoverage
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, coverage_pct, bts_total, bts_on_battery, battery_hours_remaining) by gmina_code
+| where coverage_pct < 0.6
+| join kind=inner (dim_gmina | project gmina_code, gmina_name, lat, lon) on gmina_code
+| project gmina_name, lat, lon, Pokrycie = round(coverage_pct * 100, 0),
+          BTSnaBaterii = bts_on_battery, ZapasH = round(battery_hours_remaining, 1)
+
+// 17. Kafelek: „Pokrycie telekomunikacyjne w czasie” | Strona: Lacznosc i ostrzeganie
+TelecomCoverage
+| where event_time between (_startTime .. _endTime)
+| summarize SrednePokrycie = round(avg(coverage_pct) * 100, 1),
+            GminyPonizej20 = countif(coverage_pct < 0.2),
+            GminyPonizej60 = countif(coverage_pct < 0.6)
+    by Czas = bin(event_time, 1m)
+| order by Czas asc
+
+// 18. Kafelek: „Skutecznosc kanalow ostrzegania SPO-3” | Strona: Lacznosc i ostrzeganie
+// Bez filtru czasu: ostrzeganie SPO-3 poprzedza kaskade, wiec w ruchomym oknie live
+// tych zdarzen juz nie ma. Kafelek pokazuje bilans calej akcji ostrzegawczej.
 AlertDelivery
-| summarize sent=sum(messages_sent), delivered=sum(messages_delivered), opened=sum(messages_opened) by channel
-| extend delivery_rate=delivered*100.0/sent, open_rate=opened*100.0/delivered
-| order by delivery_rate desc
+| summarize Wyslane = sum(messages_sent), Dostarczone = sum(messages_delivered), Otwarte = sum(messages_opened) by Kanal = channel
+| extend Dostarczalnosc = round(todouble(Dostarczone) * 100.0 / todouble(max_of(Wyslane, 1)), 1)
+| project Kanal, Dostarczalnosc, Wyslane, Dostarczone, Otwarte
+| order by Dostarczalnosc desc
+
+// 19. Kafelek: „Gminy o najnizszej dostarczalnosci ostrzezen” | Strona: Lacznosc i ostrzeganie
+AlertDelivery
+| summarize Wyslane = sum(messages_sent), Dostarczone = sum(messages_delivered) by gmina_code
+| where Wyslane > 0
+| extend Dostarczalnosc = round(todouble(Dostarczone) * 100.0 / todouble(Wyslane), 1)
+| join kind=inner (dim_gmina | project gmina_code, gmina_name, population) on gmina_code
+| project Gmina = gmina_name, Dostarczalnosc, Wyslane, Dostarczone, Mieszkancy = population
+| order by Dostarczalnosc asc
+| take 30
+
+// 20. Kafelek: „Temperatura odczuwalna w powiatach” | Strona: Pogoda i prognoza
+WeatherReadings
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, feels_like_c, temperature_c, wind_kmh, icing_index) by powiat_code
+| join kind=inner (dim_powiat | project powiat_code, powiat_name, lat, lon) on powiat_code
+| project powiat_name, lat, lon, Odczuwalna = feels_like_c, Temperatura = temperature_c,
+          Wiatr = wind_kmh, Oblodzenie = icing_index
+
+// 21. Kafelek: „Przebieg warunkow pogodowych” | Strona: Pogoda i prognoza
+WeatherReadings
+| where event_time between (_startTime .. _endTime)
+| summarize Odczuwalna = round(avg(feels_like_c), 1), Temperatura = round(avg(temperature_c), 1),
+            Wiatr = round(avg(wind_kmh), 1)
+    by Czas = bin(event_time, 1m)
+| order by Czas asc
+
+// 22. Kafelek: „Powiaty o najostrzejszych warunkach” | Strona: Pogoda i prognoza
+WeatherReadings
+| where event_time between (_startTime .. _endTime)
+| summarize arg_max(event_time, feels_like_c, wind_kmh, snow_cm_30m, icing_index) by powiat_code
+| join kind=inner (dim_powiat | project powiat_code, powiat_name, voivodeship_code) on powiat_code
+| join kind=inner (dim_voivodeship | project voivodeship_code, voivodeship_name) on voivodeship_code
+| project Powiat = powiat_name, Wojewodztwo = voivodeship_name, Odczuwalna = feels_like_c,
+          Wiatr = wind_kmh, SniegCm = snow_cm_30m, Oblodzenie = icing_index
+| order by Odczuwalna asc
+| take 30

@@ -1,0 +1,1098 @@
+{
+  "$schema": "https://pbiadx.powerbi.com/static/d/schema/60/dashboard.json",
+  "id": "cb0d1a78-2267-5f5c-7d61-79a6e32c77c1",
+  "eTag": "",
+  "schema_version": "60",
+  "title": "OL_BLK_Dashboard",
+  "autoRefresh": {
+    "enabled": true,
+    "defaultInterval": "10s",
+    "minInterval": "10s"
+  },
+  "tiles": [
+    {
+      "id": "0de28967-9711-58a5-5e25-10e7e6cb4ad8",
+      "title": "Gminy bez zasilania",
+      "visualType": "map",
+      "pageId": "d6dd49b7-0be4-12bc-7b37-bbaa692f5799",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "8a46ddc7-59ec-6ec0-bbfe-c7acf5760a67"
+      },
+      "visualOptions": {
+        "map__latitudeColumn": "lat",
+        "legendLocation": "bottom",
+        "map__bubbleFormat": "bubble",
+        "hideLegend": false,
+        "map__longitudeColumn": "lon",
+        "map__minBubbleSizeColumn": "Odbiorcy"
+      }
+    },
+    {
+      "id": "7b688148-8720-2d8d-6a9a-37af459c4777",
+      "title": "Puls sytuacji kryzysowej",
+      "visualType": "multistat",
+      "pageId": "d6dd49b7-0be4-12bc-7b37-bbaa692f5799",
+      "layout": {
+        "x": 12,
+        "y": 0,
+        "width": 6,
+        "height": 3
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "87f5204e-cadc-658c-6450-541aad3e7ea7"
+      },
+      "visualOptions": {
+        "colorRules": [],
+        "multiStat__displayOrientation": "horizontal",
+        "multiStat__textSize": "auto",
+        "multiStat__slot": {
+          "width": 4,
+          "height": 1
+        },
+        "colorStyle": "light",
+        "multiStat__labelColumn": "Wskaznik",
+        "colorRulesDisabled": true,
+        "multiStat__valueColumn": "Wartosc"
+      }
+    },
+    {
+      "id": "37c0f683-ac9b-5624-da3f-6f1c433c4333",
+      "title": "Rozwoj kaskady awarii",
+      "visualType": "line",
+      "pageId": "d6dd49b7-0be4-12bc-7b37-bbaa692f5799",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "cba8a48c-269d-b8f1-12ae-b37863c12f4a"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "Odbiorcy"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": [
+          "Etap"
+        ],
+        "xColumn": "Czas",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Czas",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "2fc12b18-6f60-c52e-81cb-358f30bd6453",
+      "title": "Skala awarii wedlug wojewodztw",
+      "visualType": "column",
+      "pageId": "d6dd49b7-0be4-12bc-7b37-bbaa692f5799",
+      "layout": {
+        "x": 12,
+        "y": 8,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "d49d111f-9197-046d-e7c8-0074fc1fb8de"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "Odbiorcy"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": null,
+        "xColumn": "Wojewodztwo",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Wojewodztwo",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "b129c2dc-fdbb-3ebe-a0ca-cea1cb7a7491",
+      "title": "Gminy wymagajace decyzji",
+      "visualType": "table",
+      "pageId": "d6dd49b7-0be4-12bc-7b37-bbaa692f5799",
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "9a5f5e24-330c-bf10-6b35-ed039498e2c3"
+      },
+      "visualOptions": {
+        "colorRules": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "colorRulesDisabled": true,
+        "table__enableRenderLinks": true,
+        "table__renderLinks": [],
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "2981c2b8-e9a6-eb8a-18d5-9f5c06a0f11d",
+      "title": "Ludnosc wrazliwa w gminach bez zasilania",
+      "visualType": "table",
+      "pageId": "482e4d7c-99f5-ee84-b1f5-6a68b56d0233",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "72549711-8153-0ece-ae6b-c166036475f6"
+      },
+      "visualOptions": {
+        "colorRules": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "colorRulesDisabled": true,
+        "table__enableRenderLinks": true,
+        "table__renderLinks": [],
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "dc86dd54-aafb-2e55-cb95-ed632ef996fe",
+      "title": "Osoby wrazliwe bez zasilania wedlug wojewodztw",
+      "visualType": "column",
+      "pageId": "482e4d7c-99f5-ee84-b1f5-6a68b56d0233",
+      "layout": {
+        "x": 12,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "b63c1280-9401-67fb-0bd0-be34fdeb76c7"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "Wrazliwi"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": null,
+        "xColumn": "Wojewodztwo",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Wojewodztwo",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "edda896e-41a6-ec05-7c5b-2f7471399513",
+      "title": "Struktura osob priorytetowych",
+      "visualType": "pie",
+      "pageId": "482e4d7c-99f5-ee84-b1f5-6a68b56d0233",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 6,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "1206420b-d6e2-a4cc-2d88-570728d18d3a"
+      },
+      "visualOptions": {
+        "pie__orderBy": "size",
+        "xColumn": "Kategoria",
+        "pie__label": [
+          "name",
+          "percentage"
+        ],
+        "pie__kind": "donut",
+        "legendLocation": "right",
+        "yColumns": [
+          "Osoby"
+        ],
+        "hideLegend": false
+      }
+    },
+    {
+      "id": "9f4515a7-d66f-8afc-aa3f-07ddb427d4f9",
+      "title": "Zgloszenia 112 wedlug rodzaju",
+      "visualType": "line",
+      "pageId": "482e4d7c-99f5-ee84-b1f5-6a68b56d0233",
+      "layout": {
+        "x": 12,
+        "y": 8,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "437b0e12-682b-9bc4-7406-04bde18b484a"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "Zgloszenia"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": [
+          "Rodzaj"
+        ],
+        "xColumn": "Czas",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Czas",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "44222688-009c-0820-4a54-53b7c6a0cfc4",
+      "title": "Osoby priorytetowe w gminach odcietych",
+      "visualType": "table",
+      "pageId": "482e4d7c-99f5-ee84-b1f5-6a68b56d0233",
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "dd560417-905d-dfb7-41d2-912875cf6633"
+      },
+      "visualOptions": {
+        "colorRules": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "colorRulesDisabled": true,
+        "table__enableRenderLinks": true,
+        "table__renderLinks": [],
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "8e014e16-4297-07c2-6792-df9bd51eb7a4",
+      "title": "Punkty grzewcze w terenie",
+      "visualType": "map",
+      "pageId": "b5ea5e19-d5f4-72d8-0729-e276ac02153a",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "25be6173-1cde-3ce2-3713-4907ddd5b66c"
+      },
+      "visualOptions": {
+        "map__latitudeColumn": "lat",
+        "legendLocation": "bottom",
+        "map__bubbleFormat": "bubble",
+        "hideLegend": false,
+        "map__longitudeColumn": "lon",
+        "map__minBubbleSizeColumn": "Osoby"
+      }
+    },
+    {
+      "id": "0de321e3-d920-4bc2-ecdf-8fc172b28ab5",
+      "title": "Zapelnienie punktow grzewczych",
+      "visualType": "column",
+      "pageId": "b5ea5e19-d5f4-72d8-0729-e276ac02153a",
+      "layout": {
+        "x": 12,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "c8bf1907-fef6-746a-8541-edf8c8f53359"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "Zapelnienie"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": null,
+        "xColumn": "Punkt",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Punkt grzewczy",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "ca93939b-bd48-8588-ad5a-eb3f24797ebe",
+      "title": "Placowki opieki wymagajace zasilania",
+      "visualType": "table",
+      "pageId": "b5ea5e19-d5f4-72d8-0729-e276ac02153a",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "3f98e662-110f-2684-5e55-553bf1fd6b86"
+      },
+      "visualOptions": {
+        "colorRules": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "colorRulesDisabled": true,
+        "table__enableRenderLinks": true,
+        "table__renderLinks": [],
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "08313493-e673-0dd5-fdd1-458a9fb839f6",
+      "title": "Agregaty wedlug stanu dysponowania",
+      "visualType": "column",
+      "pageId": "b5ea5e19-d5f4-72d8-0729-e276ac02153a",
+      "layout": {
+        "x": 12,
+        "y": 8,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "396ddcf3-8fe2-f8b4-4ab2-9fb478b9d193"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "Agregaty"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": [
+          "Cel"
+        ],
+        "xColumn": "Stan",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Stan dysponowania",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "9b045203-3136-cbf2-790f-daea3972b70b",
+      "title": "Rozdysponowana moc w czasie",
+      "visualType": "line",
+      "pageId": "b5ea5e19-d5f4-72d8-0729-e276ac02153a",
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "95d375a9-c363-54f7-5f22-337c550f47d8"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "MocKW",
+          "Dyspozycje"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": null,
+        "xColumn": "Czas",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Czas",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "acb40428-e9bf-952f-660b-9c4f945ef2d2",
+      "title": "Gminy bez lacznosci",
+      "visualType": "map",
+      "pageId": "6286cf01-b463-aae1-ee4e-091cadb7d83f",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "f000f5e4-ef99-45e2-e1d3-09be982e5049"
+      },
+      "visualOptions": {
+        "map__latitudeColumn": "lat",
+        "legendLocation": "bottom",
+        "map__bubbleFormat": "bubble",
+        "hideLegend": false,
+        "map__longitudeColumn": "lon",
+        "map__minBubbleSizeColumn": "BTSnaBaterii"
+      }
+    },
+    {
+      "id": "e7f7b815-78b0-9ca9-b261-256386b155fa",
+      "title": "Pokrycie telekomunikacyjne w czasie",
+      "visualType": "line",
+      "pageId": "6286cf01-b463-aae1-ee4e-091cadb7d83f",
+      "layout": {
+        "x": 12,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "dd8ea874-77d5-57d7-32ac-5f411a427e48"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "SrednePokrycie",
+          "GminyPonizej20",
+          "GminyPonizej60"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": null,
+        "xColumn": "Czas",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Czas",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "b8e4c99a-00cc-509d-dc04-5842c29b5e51",
+      "title": "Skutecznosc kanalow ostrzegania SPO-3",
+      "visualType": "column",
+      "pageId": "6286cf01-b463-aae1-ee4e-091cadb7d83f",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "5732522c-0fa9-30c5-870c-72692c2f6ec5"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "Dostarczalnosc"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": null,
+        "xColumn": "Kanal",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Kanal ostrzegania",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "c54e41b9-aa17-9918-bace-fd241e16dcbb",
+      "title": "Gminy o najnizszej dostarczalnosci ostrzezen",
+      "visualType": "table",
+      "pageId": "6286cf01-b463-aae1-ee4e-091cadb7d83f",
+      "layout": {
+        "x": 12,
+        "y": 8,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "a9d8c670-d018-a247-11fb-414427288fdf"
+      },
+      "visualOptions": {
+        "colorRules": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "colorRulesDisabled": true,
+        "table__enableRenderLinks": true,
+        "table__renderLinks": [],
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "colorStyle": "light"
+      }
+    },
+    {
+      "id": "b856bfb9-91fa-a8dc-a7eb-5a425d8d0dfe",
+      "title": "Temperatura odczuwalna w powiatach",
+      "visualType": "map",
+      "pageId": "ddb461c0-98fc-2b10-72da-0e82b5267247",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "06f155ac-5d34-6cdd-b503-3a6704e0989f"
+      },
+      "visualOptions": {
+        "map__latitudeColumn": "lat",
+        "legendLocation": "bottom",
+        "map__bubbleFormat": "bubble",
+        "hideLegend": false,
+        "map__longitudeColumn": "lon",
+        "map__minBubbleSizeColumn": "Wiatr"
+      }
+    },
+    {
+      "id": "4aeedcdf-438c-d467-0825-0257d6bc2ce9",
+      "title": "Przebieg warunkow pogodowych",
+      "visualType": "line",
+      "pageId": "ddb461c0-98fc-2b10-72da-0e82b5267247",
+      "layout": {
+        "x": 12,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "df793e72-2def-293d-a0c2-b56c44e90bf9"
+      },
+      "visualOptions": {
+        "crossFilter": [],
+        "yColumns": [
+          "Odczuwalna",
+          "Temperatura",
+          "Wiatr"
+        ],
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "crossFilterDisabled": false,
+        "seriesColumns": null,
+        "xColumn": "Czas",
+        "multipleYAxes": {
+          "base": {
+            "yAxisMinimumValue": null,
+            "label": "",
+            "id": "-1",
+            "horizontalLines": [],
+            "columns": [],
+            "yAxisScale": "linear",
+            "yAxisMaximumValue": null
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "xColumnTitle": "Czas",
+        "hideLegend": false,
+        "xAxisScale": "linear",
+        "legendLocation": "bottom",
+        "verticalLine": ""
+      }
+    },
+    {
+      "id": "2c72e7c6-d78e-5981-1ca3-21197b7126c9",
+      "title": "Powiaty o najostrzejszych warunkach",
+      "visualType": "table",
+      "pageId": "ddb461c0-98fc-2b10-72da-0e82b5267247",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 7
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "0de0f414-8ba5-6107-1210-47e87683cb01"
+      },
+      "visualOptions": {
+        "colorRules": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "colorRulesDisabled": true,
+        "table__enableRenderLinks": true,
+        "table__renderLinks": [],
+        "drillthroughDisabled": false,
+        "crossFilter": [],
+        "colorStyle": "light"
+      }
+    }
+  ],
+  "baseQueries": [],
+  "parameters": [
+    {
+      "kind": "duration",
+      "id": "69562319-25e6-625c-ba55-019e48f1165f",
+      "displayName": "Zakres czasu",
+      "description": "Ruchome okno ostatnich 15 minut zegara. Scenariusz biegnie w tempie 60x, wiec okno obejmuje ok. 15 godzin akcji i przesuwa sie razem z zegarem.",
+      "beginVariableName": "_startTime",
+      "endVariableName": "_endTime",
+      "defaultValue": {
+        "kind": "dynamic",
+        "count": 15,
+        "unit": "minutes"
+      },
+      "showOnPages": {
+        "kind": "all"
+      }
+    }
+  ],
+  "dataSources": [
+    {
+      "kind": "kusto-trident",
+      "scopeId": "kusto-trident",
+      "clusterUri": "https://trd-bv9kuej96btp7bpuq7.z6.kusto.fabric.microsoft.com",
+      "database": "2b228a24-f180-4b27-a916-688208854533",
+      "name": "OL_BLK_Eventhouse",
+      "id": "b89bc721-f036-e371-1d1a-935f77e3af8c",
+      "workspace": "68e1369e-bc4d-4c87-a747-e3fd78c21f21"
+    }
+  ],
+  "pages": [
+    {
+      "name": "Obraz sytuacji",
+      "id": "d6dd49b7-0be4-12bc-7b37-bbaa692f5799"
+    },
+    {
+      "name": "Ludnosc wrazliwa",
+      "id": "482e4d7c-99f5-ee84-b1f5-6a68b56d0233"
+    },
+    {
+      "name": "Cieplo i opieka",
+      "id": "b5ea5e19-d5f4-72d8-0729-e276ac02153a"
+    },
+    {
+      "name": "Lacznosc i ostrzeganie",
+      "id": "6286cf01-b463-aae1-ee4e-091cadb7d83f"
+    },
+    {
+      "name": "Pogoda i prognoza",
+      "id": "ddb461c0-98fc-2b10-72da-0e82b5267247"
+    }
+  ],
+  "queries": [
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "OutageEvents\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, status, customers_without_power, cascade_stage) by gmina_code\n| where status != 'restored'\n| join kind=inner (dim_gmina | project gmina_code, gmina_name, lat, lon) on gmina_code\n| project gmina_name, lat, lon, Odbiorcy = customers_without_power, Etap = cascade_stage, status",
+      "id": "8a46ddc7-59ec-6ec0-bbfe-c7acf5760a67",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "let awarie = OutageEvents | where event_time between (_startTime .. _endTime)\n    | summarize arg_max(event_time, status, customers_without_power) by gmina_code\n    | where status != 'restored';\nlet zgloszenia = EmergencyCalls | where event_time between (_startTime .. _endTime);\nlet telco = TelecomCoverage | where event_time between (_startTime .. _endTime)\n    | summarize arg_max(event_time, coverage_pct) by gmina_code;\nlet punkty = HeatingPointStatus | where event_time between (_startTime .. _endTime)\n    | summarize arg_max(event_time, status, occupancy, capacity) by heating_point_id;\nlet agregaty = GeneratorDispatch | where event_time between (_startTime .. _endTime)\n    | summarize arg_max(event_time, status, power_kw) by dispatch_id;\nunion\n  (awarie     | summarize Wskaznik = 'Gminy bez pradu', Wartosc = dcount(gmina_code)),\n  (awarie     | summarize Wskaznik = 'Odbiorcy bez pradu', Wartosc = sum(customers_without_power)),\n  (zgloszenia | summarize Wskaznik = 'Zgloszenia 112', Wartosc = count()),\n  (zgloszenia | summarize Wskaznik = 'W tym priorytet P1', Wartosc = countif(priority == 'P1')),\n  (telco      | summarize Wskaznik = 'Gminy bez lacznosci', Wartosc = countif(coverage_pct < 0.2)),\n  (punkty     | summarize Wskaznik = 'Osoby w punktach grzewczych', Wartosc = sum(occupancy)),\n  (agregaty   | summarize Wskaznik = 'Agregaty w dyspozycji', Wartosc = count())",
+      "id": "87f5204e-cadc-658c-6450-541aad3e7ea7",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "OutageEvents\n| where event_time between (_startTime .. _endTime)\n| summarize Odbiorcy = sum(customers_without_power), Gminy = dcount(gmina_code)\n    by Czas = bin(event_time, 1m), Etap = strcat('Etap ', tostring(cascade_stage))\n| order by Czas asc",
+      "id": "cba8a48c-269d-b8f1-12ae-b37863c12f4a",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "OutageEvents\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, status, customers_without_power) by gmina_code\n| where status != 'restored'\n| join kind=inner (dim_gmina | project gmina_code, voivodeship_code) on gmina_code\n| summarize Odbiorcy = sum(customers_without_power), Gminy = dcount(gmina_code) by voivodeship_code\n| join kind=inner (dim_voivodeship | project voivodeship_code, voivodeship_name) on voivodeship_code\n| project Wojewodztwo = voivodeship_name, Odbiorcy, Gminy\n| order by Odbiorcy desc",
+      "id": "d49d111f-9197-046d-e7c8-0074fc1fb8de",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "let telco = TelecomCoverage | where event_time between (_startTime .. _endTime)\n    | summarize arg_max(event_time, coverage_pct) by gmina_code;\nOutageEvents\n| where event_time between (_startTime .. _endTime)\n| summarize Poczatek = min(event_time), arg_max(event_time, status, customers_without_power, root_cause, eta_restore_time) by gmina_code\n| where status != 'restored'\n| extend Godzin = round(todouble(datetime_diff('minute', event_time, Poczatek)) / 60.0, 1)\n| join kind=leftouter (telco) on gmina_code\n| join kind=inner (dim_gmina | project gmina_code, gmina_name, voivodeship_code) on gmina_code\n| join kind=inner (dim_voivodeship | project voivodeship_code, voivodeship_name) on voivodeship_code\n| project Gmina = gmina_name, Wojewodztwo = voivodeship_name, Odbiorcy = customers_without_power,\n          Godzin, Lacznosc = round(coalesce(coverage_pct, 1.0) * 100, 0), Przyczyna = root_cause,\n          Przywrocenie = eta_restore_time\n| order by Odbiorcy desc\n| take 40",
+      "id": "9a5f5e24-330c-bf10-6b35-ed039498e2c3",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "OutageEvents\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, status, customers_without_power) by gmina_code\n| where status != 'restored'\n| join kind=inner (PopulationVulnerability | project gmina_code, population, vulnerable_population_est, rescue_travel_time_min) on gmina_code\n| join kind=inner (dim_gmina | project gmina_code, gmina_name) on gmina_code\n| extend Udzial = todouble(customers_without_power) / todouble(max_of(population, 1))\n| extend Wrazliwi = tolong(vulnerable_population_est * min_of(Udzial, 1.0))\n| project Gmina = gmina_name, Wrazliwi, Odbiorcy = customers_without_power,\n          DojazdMin = rescue_travel_time_min, Populacja = population\n| order by Wrazliwi desc\n| take 40",
+      "id": "72549711-8153-0ece-ae6b-c166036475f6",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "OutageEvents\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, status, customers_without_power) by gmina_code\n| where status != 'restored'\n| join kind=inner (PopulationVulnerability | project gmina_code, population, vulnerable_population_est) on gmina_code\n| extend Wrazliwi = tolong(vulnerable_population_est * min_of(todouble(customers_without_power) / todouble(max_of(population, 1)), 1.0))\n| join kind=inner (dim_gmina | project gmina_code, voivodeship_code) on gmina_code\n| summarize Wrazliwi = sum(Wrazliwi) by voivodeship_code\n| join kind=inner (dim_voivodeship | project voivodeship_code, voivodeship_name) on voivodeship_code\n| project Wojewodztwo = voivodeship_name, Wrazliwi\n| order by Wrazliwi desc",
+      "id": "b63c1280-9401-67fb-0bd0-be34fdeb76c7",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "PriorityPersons\n| summarize Osoby = count() by Kategoria = category\n| order by Osoby desc",
+      "id": "1206420b-d6e2-a4cc-2d88-570728d18d3a",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "EmergencyCalls\n| where event_time between (_startTime .. _endTime)\n| summarize Zgloszenia = count() by Czas = bin(event_time, 1m), Rodzaj = call_type\n| order by Czas asc",
+      "id": "437b0e12-682b-9bc4-7406-04bde18b484a",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "let bezPradu = OutageEvents | where event_time between (_startTime .. _endTime)\n    | summarize arg_max(event_time, status) by gmina_code | where status != 'restored' | project gmina_code;\nlet telco = TelecomCoverage | where event_time between (_startTime .. _endTime)\n    | summarize arg_max(event_time, coverage_pct) by gmina_code;\nPriorityPersons\n| where category in ('dialysis', 'home_oxygen', 'powered_medical_device')\n| join kind=inner (bezPradu) on gmina_code\n| join kind=leftouter (telco) on gmina_code\n| join kind=inner (dim_gmina | project gmina_code, gmina_name) on gmina_code\n| project Osoba = person_token, Kategoria = category, Gmina = gmina_name,\n          AutonomiaH = medical_device_autonomy_hours,\n          Lacznosc = round(coalesce(coverage_pct, 1.0) * 100, 0), Samotnie = is_living_alone\n| order by AutonomiaH asc\n| take 40",
+      "id": "dd560417-905d-dfb7-41d2-912875cf6633",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "HeatingPointStatus\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, status, occupancy, capacity, needs_generator, needs_medical_support) by heating_point_id\n| join kind=inner (HeatingPoints | project heating_point_id, heating_point_type, lat, lon) on heating_point_id\n| extend Zapelnienie = round(todouble(occupancy) * 100.0 / todouble(max_of(capacity, 1)), 0)\n| project heating_point_id, lat, lon, Zapelnienie, Osoby = occupancy, Typ = heating_point_type, status",
+      "id": "25be6173-1cde-3ce2-3713-4907ddd5b66c",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "HeatingPointStatus\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, occupancy, capacity, gmina_code) by heating_point_id\n| extend Zapelnienie = round(todouble(occupancy) * 100.0 / todouble(max_of(capacity, 1)), 0)\n| join kind=inner (dim_gmina | project gmina_code, gmina_name) on gmina_code\n| project Punkt = strcat(gmina_name, ' / ', heating_point_id), Zapelnienie, Osoby = occupancy\n| order by Zapelnienie desc\n| take 20",
+      "id": "c8bf1907-fef6-746a-8541-edf8c8f53359",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "CareFacilityAutonomyState()\n| where recommended_action != 'monitor'\n| join kind=inner (dim_gmina | project gmina_code, gmina_name) on gmina_code\n| project Placowka = facility_id, Typ = facility_type, Gmina = gmina_name,\n          Podopieczni = current_occupancy, AutonomiaH = generator_autonomy_hours,\n          MocKW = power_need_kw, Rekomendacja = recommended_action\n| order by Podopieczni desc\n| take 40",
+      "id": "3f98e662-110f-2684-5e55-553bf1fd6b86",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "GeneratorDispatch\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, status, power_kw, target_type) by dispatch_id\n| summarize Agregaty = count(), MocKW = sum(power_kw) by Stan = status, Cel = target_type\n| order by Agregaty desc",
+      "id": "396ddcf3-8fe2-f8b4-4ab2-9fb478b9d193",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "GeneratorDispatch\n| where event_time between (_startTime .. _endTime)\n| summarize MocKW = sum(power_kw), Dyspozycje = count() by Czas = bin(event_time, 1m)\n| order by Czas asc",
+      "id": "95d375a9-c363-54f7-5f22-337c550f47d8",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "TelecomCoverage\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, coverage_pct, bts_total, bts_on_battery, battery_hours_remaining) by gmina_code\n| where coverage_pct < 0.6\n| join kind=inner (dim_gmina | project gmina_code, gmina_name, lat, lon) on gmina_code\n| project gmina_name, lat, lon, Pokrycie = round(coverage_pct * 100, 0),\n          BTSnaBaterii = bts_on_battery, ZapasH = round(battery_hours_remaining, 1)",
+      "id": "f000f5e4-ef99-45e2-e1d3-09be982e5049",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "TelecomCoverage\n| where event_time between (_startTime .. _endTime)\n| summarize SrednePokrycie = round(avg(coverage_pct) * 100, 1),\n            GminyPonizej20 = countif(coverage_pct < 0.2),\n            GminyPonizej60 = countif(coverage_pct < 0.6)\n    by Czas = bin(event_time, 1m)\n| order by Czas asc",
+      "id": "dd8ea874-77d5-57d7-32ac-5f411a427e48",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "AlertDelivery\n| summarize Wyslane = sum(messages_sent), Dostarczone = sum(messages_delivered), Otwarte = sum(messages_opened) by Kanal = channel\n| extend Dostarczalnosc = round(todouble(Dostarczone) * 100.0 / todouble(max_of(Wyslane, 1)), 1)\n| project Kanal, Dostarczalnosc, Wyslane, Dostarczone, Otwarte\n| order by Dostarczalnosc desc",
+      "id": "5732522c-0fa9-30c5-870c-72692c2f6ec5",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "AlertDelivery\n| summarize Wyslane = sum(messages_sent), Dostarczone = sum(messages_delivered) by gmina_code\n| where Wyslane > 0\n| extend Dostarczalnosc = round(todouble(Dostarczone) * 100.0 / todouble(Wyslane), 1)\n| join kind=inner (dim_gmina | project gmina_code, gmina_name, population) on gmina_code\n| project Gmina = gmina_name, Dostarczalnosc, Wyslane, Dostarczone, Mieszkancy = population\n| order by Dostarczalnosc asc\n| take 30",
+      "id": "a9d8c670-d018-a247-11fb-414427288fdf",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "WeatherReadings\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, feels_like_c, temperature_c, wind_kmh, icing_index) by powiat_code\n| join kind=inner (dim_powiat | project powiat_code, powiat_name, lat, lon) on powiat_code\n| project powiat_name, lat, lon, Odczuwalna = feels_like_c, Temperatura = temperature_c,\n          Wiatr = wind_kmh, Oblodzenie = icing_index",
+      "id": "06f155ac-5d34-6cdd-b503-3a6704e0989f",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "WeatherReadings\n| where event_time between (_startTime .. _endTime)\n| summarize Odczuwalna = round(avg(feels_like_c), 1), Temperatura = round(avg(temperature_c), 1),\n            Wiatr = round(avg(wind_kmh), 1)\n    by Czas = bin(event_time, 1m)\n| order by Czas asc",
+      "id": "df793e72-2def-293d-a0c2-b56c44e90bf9",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "b89bc721-f036-e371-1d1a-935f77e3af8c"
+      },
+      "text": "WeatherReadings\n| where event_time between (_startTime .. _endTime)\n| summarize arg_max(event_time, feels_like_c, wind_kmh, snow_cm_30m, icing_index) by powiat_code\n| join kind=inner (dim_powiat | project powiat_code, powiat_name, voivodeship_code) on powiat_code\n| join kind=inner (dim_voivodeship | project voivodeship_code, voivodeship_name) on voivodeship_code\n| project Powiat = powiat_name, Wojewodztwo = voivodeship_name, Odczuwalna = feels_like_c,\n          Wiatr = wind_kmh, SniegCm = snow_cm_30m, Oblodzenie = icing_index\n| order by Odczuwalna asc\n| take 30",
+      "id": "0de0f414-8ba5-6107-1210-47e87683cb01",
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
+    }
+  ]
+}
