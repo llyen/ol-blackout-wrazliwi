@@ -79,8 +79,9 @@
     CareFacilities
     | join kind=leftouter (CurrentOutageByGmina() | project gmina_code, is_without_power, customers_without_power) on gmina_code
     | extend has_power_risk = coalesce(is_without_power, false),
-             autonomy_low = has_generator == false or generator_autonomy_hours < 2,
-             recommended_action = case(autonomy_low and has_power_risk, 'dispatch_generator_or_evacuation',
+             autonomy_low = has_generator == false or generator_autonomy_hours < 2
+    // Osobny extend, bo KQL nie pozwala odwolac sie do kolumny tworzonej w tym samym kroku.
+    | extend recommended_action = case(autonomy_low and has_power_risk, 'dispatch_generator_or_evacuation',
                                        autonomy_low, 'prepare_generator',
                                        'monitor')
     | project facility_id, facility_type, gmina_code, current_occupancy, has_generator,
