@@ -10,6 +10,7 @@ services:
       enabled: true
     allowedRedirectUris:
       - http://localhost:5173
+      - https://maple-gulf-3321fb8cc7-westeurope.webapp.fabricapps.net
   data:
     enabled: true
     dialect: mssql
@@ -18,3 +19,7 @@ services:
     folder: dist
     buildCommand: npm run build:fabric
     indexDocument: index.html
+  storage:
+    enabled: false
+  functions:
+    enabled: false

@@ -11,8 +11,9 @@ zależnych od zasilania, po potwierdzenie wizyty w terenie i ostrzeżenie ludno�
 
 | Element | Wartość |
 |---|---|
-| Adres | _(uzupełnić po `rayfin up`)_ |
-| Workspace | `OL-ZK-Demo-Blackout` |
+| Adres | https://maple-gulf-3321fb8cc7-westeurope.webapp.fabricapps.net |
+| Rayfin Item ID | `42ae39c1-c9df-4327-b2fc-a91e26aaa196` |
+| Workspace | `68e1369e-bc4d-4c87-a747-e3fd78c21f21` (ol-zk-demo-blackout) |
 | Pojemność | `fcdemo` (F8, West Europe, `rg-fabric-cap-demo`) |
 | Dzierżawa | `7ada8cf4-c4be-488f-a844-6d37ee64849e` |
 

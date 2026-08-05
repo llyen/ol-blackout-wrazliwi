@@ -183,6 +183,26 @@ technicznie poprawnie, ale bezużytecznie jako materiał na odprawę.
    zakłada tabelę `dim_date_time`, której notatniki nie generują (wymaga parametru wdrożeniowego D0)
    — do rozstrzygnięcia przy budowie modelu.
 2. **Data Agent** — instrukcje i przykładowe pytania w `ai\DATA_AGENT.md`.
-3. **Fabric App / Rayfin** — specyfikacja `fabric-app\APP_SPEC.md`, prompt `fabric-app\RAYFIN_PROMPT.md`.
-4. **Powiadomienia Activatora** — reguły KQL działają; kanały powiadomień dokonfigurować w UI
+3. **Powiadomienia Activatora** — reguły KQL działają; kanały powiadomień dokonfigurować w UI
    wg `activator\RULES.md`.
+
+## 10. Fabric App „Tarcza Zimowa" — wdrożona
+
+| Element | Wartość |
+|---|---|
+| Adres | https://maple-gulf-3321fb8cc7-westeurope.webapp.fabricapps.net |
+| Rayfin Item ID | `42ae39c1-c9df-4327-b2fc-a91e26aaa196` |
+| Workspace | `68e1369e-bc4d-4c87-a747-e3fd78c21f21` (ol-zk-demo-blackout) |
+| Pojemność | `fcdemo` (F8, West Europe, `rg-fabric-cap-demo`) |
+| Kod | `fabric-app\pulpit-tarcza` |
+
+Pięć ekranów: obraz krajowy IZŻ, agregaty osób wrażliwych, kolejka wizyt kontrolnych,
+punkty grzewcze, ostrzeganie SPO-3. Encje zapisu zaaplikowane (`rayfin up db apply`),
+adres dopisany do `allowedRedirectUris`. Szczegóły i sposób uruchomienia —
+`fabric-app\pulpit-tarcza\README.md`.
+
+Sprawdzone automatycznie: budowanie, 39 testów, audyt kontrastu WCAG, odpowiedź serwisu
+(HTTP 200) i serwowanie sceny (2,55 MB).
+
+**Do przeklikania przez człowieka w portalu:** logowanie brokerem Fabric i zapis wiersza
+przez formularz. Ścieżka zapisu nie została jeszcze wykonana ręcznie od końca do końca.
