@@ -31,6 +31,7 @@ mazowieckie).
 | `01_load_dimensions` … `06_whatif` | Notebook (8) | zob. workspace |
 | `OL_BLK_SemanticModel` | Semantic Model (Direct Lake) | `9c155940-adc2-432c-8304-fc3dd3c1057f` |
 | `OL_BLK_Report` | Power BI Report (PBIR, 8 stron) | `71ae9488-7579-499e-a856-5ca8c977211a` |
+| `agent_blackout_wrazliwi` | Data Agent (Lakehouse + Eventhouse + model, 24/17/24 tabele) | `bece0e68-7118-4a28-9f03-1d0b8c91cc95` |
 
 ## 3. Kolejność wdrożenia
 
@@ -181,14 +182,22 @@ technicznie poprawnie, ale bezużytecznie jako materiał na odprawę.
 
 ## 9. Kroki pozostające do wykonania
 
-1. **Data Agent** — instrukcje i przykładowe pytania w `ai\DATA_AGENT.md`.
-2. **Powiadomienia Activatora** — reguły KQL działają; kanały powiadomień dokonfigurować w UI
+1. **Powiadomienia Activatora** — reguły KQL działają; kanały powiadomień dokonfigurować w UI
    wg `activator\RULES.md`.
 
 > Model semantyczny i raport Power BI (`OL_BLK_Report`, 8 stron) są wdrożone i zweryfikowane —
 > zob. `deploy\create_report.py` i `deploy\verify_report.py`. Raport buduje się na tabelach
 > wynikowych notebooków (`dim_date_time` z `MODEL.md` nie jest generowana, więc raport jej nie
 > używa).
+
+> **Data Agent „Zapytaj o dane" (`agent_blackout_wrazliwi`) jest wdrożony i zweryfikowany**
+> przez API Fabric — trzy źródła (Lakehouse 24 tabele, Eventhouse 17 tabel, model semantyczny
+> 24 tabele) i instrukcja systemowa (3183 znaki) złożona z `ai\DATA_AGENT.md`. Funkcje KQL
+> (`CurrentOutageByGmina`, `OutageHoursByGmina`, `CurrentTelecomCoverage`,
+> `CurrentHeatingPointStatus`, `EmergencyCalls15m`, `CareFacilityAutonomyState`) są opisane
+> w podpowiedzi źródła, bo backend Data Agenta odrzuca elementy typu `kusto.functions`. Skrypt
+> i weryfikacja — `deploy\create_data_agent.py`. Publikacja wersji roboczej do produkcyjnej
+> odbywa się w interfejsie Fabric.
 
 ## 10. Fabric App „Tarcza Zimowa" — wdrożona
 
