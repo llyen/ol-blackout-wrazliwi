@@ -41,15 +41,18 @@ SCHEMA_REPORT = "https://developer.microsoft.com/json-schemas/fabric/item/report
 SCHEMA_PBIR = "https://developer.microsoft.com/json-schemas/fabric/item/report/definitionProperties/1.0.0/schema.json"
 SCHEMA_VERSION = "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/versionMetadata/1.0.0/schema.json"
 
-# Paleta rzadowa (gov.pl). Czerwien jest sygnalem, nie barwa marki.
+# Paleta rzadowa (gov.pl), wartosci wprost z _program/CONVENTIONS.md i
+# _program/tools/retheme_gov.py. Czerwien jest sygnalem, nie barwa marki.
 GOV = "#0052a5"
 GOV_DARK = "#00417f"
+GOV_LIGHT = "#006cd7"
+GOV_50 = "#e8eef7"
 GOV_INK = "#1b1b1b"
-SLATE_500 = "#64748b"
-PAGE_BG = "#f1f5f9"
+SLATE_500 = "#5b6674"
+PAGE_BG = "#f5f7fa"
 CARD_BG = "#ffffff"
-BORDER = "#e2e8f0"
-# Skala powagi: zielony -> bursztyn -> pomarancz -> czerwien gov.
+BORDER = "#d8dee6"
+# Skala powagi rosnaco: zielony -> bursztyn -> pomarancz -> czerwien gov.
 SEV_GREEN, SEV_AMBER, SEV_ORANGE, SEV_RED = "#15803d", "#a16207", "#c2410c", "#d5233f"
 
 FOOTER = "Dane syntetyczne, demo. Model wskazuje priorytety - decyzje podejmuje czlowiek."
@@ -461,7 +464,7 @@ PAGE_BUILDERS = [page1, page2, page3, page4, page5, page6, page_gmina, page_tech
 
 LIGHT_THEME = {
     "name": "OL-BLK-Gov",
-    "dataColors": [GOV, SEV_RED, SEV_ORANGE, SEV_AMBER, SEV_GREEN, "#006cd7",
+    "dataColors": [GOV, SEV_RED, SEV_ORANGE, SEV_AMBER, SEV_GREEN, GOV_LIGHT,
                    "#7c3aed", "#0891b2", "#be185d", "#4d7c0f", "#b45309", "#1e40af"],
     "background": PAGE_BG,
     "foreground": GOV_INK,
