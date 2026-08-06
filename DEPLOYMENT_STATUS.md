@@ -30,6 +30,7 @@ mazowieckie).
 | `OL_BLK_Activator` | Activator (Reflex) | `03cc6e17-8be9-4114-ab0a-e404692c43f0` |
 | `01_load_dimensions` … `06_whatif` | Notebook (8) | zob. workspace |
 | `OL_BLK_SemanticModel` | Semantic Model (Direct Lake) | `9c155940-adc2-432c-8304-fc3dd3c1057f` |
+| `OL_BLK_Report` | Power BI Report (PBIR, 8 stron) | `71ae9488-7579-499e-a856-5ca8c977211a` |
 
 ## 3. Kolejność wdrożenia
 
@@ -180,12 +181,14 @@ technicznie poprawnie, ale bezużytecznie jako materiał na odprawę.
 
 ## 9. Kroki pozostające do wykonania
 
-1. **Model semantyczny i raport Power BI** — `report\REPORT_SPEC.md`, `MODEL.md`. Uwaga: `MODEL.md`
-   zakłada tabelę `dim_date_time`, której notatniki nie generują (wymaga parametru wdrożeniowego D0)
-   — do rozstrzygnięcia przy budowie modelu.
-2. **Data Agent** — instrukcje i przykładowe pytania w `ai\DATA_AGENT.md`.
-3. **Powiadomienia Activatora** — reguły KQL działają; kanały powiadomień dokonfigurować w UI
+1. **Data Agent** — instrukcje i przykładowe pytania w `ai\DATA_AGENT.md`.
+2. **Powiadomienia Activatora** — reguły KQL działają; kanały powiadomień dokonfigurować w UI
    wg `activator\RULES.md`.
+
+> Model semantyczny i raport Power BI (`OL_BLK_Report`, 8 stron) są wdrożone i zweryfikowane —
+> zob. `deploy\create_report.py` i `deploy\verify_report.py`. Raport buduje się na tabelach
+> wynikowych notebooków (`dim_date_time` z `MODEL.md` nie jest generowana, więc raport jej nie
+> używa).
 
 ## 10. Fabric App „Tarcza Zimowa" — wdrożona
 
