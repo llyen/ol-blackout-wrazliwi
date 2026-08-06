@@ -29,6 +29,7 @@ mazowieckie).
 | `OL_BLK_Dashboard` | Real-Time Dashboard | `c66f0b86-e880-415a-819d-25ed71c5d123` |
 | `OL_BLK_Activator` | Activator (Reflex) | `03cc6e17-8be9-4114-ab0a-e404692c43f0` |
 | `01_load_dimensions` … `06_whatif` | Notebook (8) | zob. workspace |
+| `OL_BLK_SemanticModel` | Semantic Model (Direct Lake) | `9c155940-adc2-432c-8304-fc3dd3c1057f` |
 
 ## 3. Kolejność wdrożenia
 

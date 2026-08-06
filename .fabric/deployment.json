@@ -1,0 +1,16 @@
+{
+  "workspaceName": "OL-ZK-Demo-Blackout",
+  "workspaceId": "68e1369e-bc4d-4c87-a747-e3fd78c21f21",
+  "capacityId": "75d74dac-c3ee-4861-8a22-e7017940afbb",
+  "lakehouseName": "OL_BLK_Lakehouse",
+  "lakehouseId": "49e3e20d-6da3-44b0-8273-ad6cd8290359",
+  "sqlEndpoint": "6sgnu6v6yshurkcenu364zeety-ty3oc2cnxsduzj2h4p6xrqq7ee.datawarehouse.fabric.microsoft.com",
+  "sqlEndpointId": "44e9e722-2014-4887-8fe6-25d0a6180ea8",
+  "eventhouseId": "6c5f862e-d3df-4669-ba72-e51eb8eeed5e",
+  "kqlDatabaseId": "2b228a24-f180-4b27-a916-688208854533",
+  "kustoQueryUri": "https://trd-bv9kuej96btp7bpuq7.z6.kusto.fabric.microsoft.com",
+  "realtimeDashboardId": "c66f0b86-e880-415a-819d-25ed71c5d123",
+  "reflexId": "03cc6e17-8be9-4114-ab0a-e404692c43f0",
+  "appBackendId": "42ae39c1-c9df-4327-b2fc-a91e26aaa196",
+  "semanticModelId": "9c155940-adc2-432c-8304-fc3dd3c1057f"
+}
